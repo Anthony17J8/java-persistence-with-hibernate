@@ -1,6 +1,8 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,6 +12,10 @@ import java.util.Set;
 
 @Entity
 public class Item {
+
+    @Id
+    @GeneratedValue(generator = "ID_GENERATOR")
+    protected Long id;
 
     @NotNull
     @Size(
@@ -23,6 +29,10 @@ public class Item {
     protected Date auctionEnd;
 
     protected Set<Bid> bids = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
 
     public Set<Bid> getBids() {
         return bids;
