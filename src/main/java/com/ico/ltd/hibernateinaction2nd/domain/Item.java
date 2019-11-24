@@ -32,7 +32,7 @@ public class Item {
     @Future
     protected Date auctionEnd;
 
-    @OneToMany
+    @OneToMany(mappedBy = "item")
     protected Set<Bid> bids = new HashSet<>();
 
     public Long getId() {
