@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
+@org.hibernate.annotations.Immutable
 public class Bid {
 
     @Id

@@ -12,6 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+// disable generation of INSERT and UPDATE SQL statements on startup
+@org.hibernate.annotations.DynamicInsert
+@org.hibernate.annotations.DynamicUpdate
 public class Item {
 
     @Id
