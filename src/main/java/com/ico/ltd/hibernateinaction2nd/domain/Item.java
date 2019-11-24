@@ -3,6 +3,7 @@ package com.ico.ltd.hibernateinaction2nd.domain;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -28,6 +29,7 @@ public class Item {
     @Future
     protected Date auctionEnd;
 
+    @OneToMany
     protected Set<Bid> bids = new HashSet<>();
 
     public Long getId() {
