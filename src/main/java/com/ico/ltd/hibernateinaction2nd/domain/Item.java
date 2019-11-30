@@ -1,7 +1,5 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,7 +29,6 @@ public class Item {
             max = 255,
             message = "Name is required, maximum 255 characters."
     )
-    @Access(AccessType.PROPERTY)
     protected String name;
 
     @NotNull
@@ -53,11 +50,24 @@ public class Item {
     @org.hibernate.annotations.Formula(value = "(select avg(b.AMOUNT) from BID b where b.ITEM_ID = ID)")
     protected BigDecimal averageBidAmount;
 
+    // in Kilos, DB in Pounds
+    @Column(name = "IMPERIALWEIGHT")
+    @org.hibernate.annotations.ColumnTransformer(
+            read = "IMPERIALWEIGHT / 2.20462",
+            write = "? * 2.20462"
+    )
+    protected double metricWeight;
+
     public Item() {
     }
 
     public Item(String name) {
         this.name = name;
+    }
+
+    public Item(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
     public Long getId() {
@@ -123,5 +133,21 @@ public class Item {
 
     public void setAverageBidAmount(BigDecimal averageBidAmount) {
         this.averageBidAmount = averageBidAmount;
+    }
+
+    public double getMetricWeight() {
+        return metricWeight;
+    }
+
+    public void setMetricWeight(double metriceWeight) {
+        this.metricWeight = metriceWeight;
+    }
+
+    public BigDecimal getInitialPrice() {
+        return initialPrice;
+    }
+
+    public void setInitialPrice(BigDecimal initialPrice) {
+        this.initialPrice = initialPrice;
     }
 }
