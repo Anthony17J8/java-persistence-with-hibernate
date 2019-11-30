@@ -1,5 +1,7 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,17 +31,25 @@ public class Item {
             max = 255,
             message = "Name is required, maximum 255 characters."
     )
+    @Access(AccessType.PROPERTY)
     protected String name;
 
     @Future
     protected Date auctionEnd;
-
 
     @Column(name = "START_PRICE", nullable = false)
     private BigDecimal initialPrice;
 
     @OneToMany(mappedBy = "item")
     protected Set<Bid> bids = new HashSet<>();
+
+
+    public Item() {
+    }
+
+    public Item(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -71,7 +81,7 @@ public class Item {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = !name.startsWith("AUCTION ") ? "AUCTION " + name : name;
     }
 
     public Date getAuctionEnd() {
