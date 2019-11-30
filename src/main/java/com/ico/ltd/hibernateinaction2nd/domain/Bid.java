@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 public class Bid {
 
     @Id
-    @GeneratedValue(generator = "ID_GENERATOR")
+    @GeneratedValue(generator = Constants.ID_GENERATOR)
     protected Long id;
 
     @ManyToOne

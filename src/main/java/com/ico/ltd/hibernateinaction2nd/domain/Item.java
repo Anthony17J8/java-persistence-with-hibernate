@@ -15,12 +15,12 @@ import java.util.Set;
 
 @Entity
 // disable generation of INSERT and UPDATE SQL statements on startup
-//@org.hibernate.annotations.DynamicInsert
-//@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert
+@org.hibernate.annotations.DynamicUpdate
 public class Item {
 
     @Id
-    @GeneratedValue(generator = "ID_GENERATOR")
+    @GeneratedValue(generator = Constants.ID_GENERATOR)
     protected Long id;
 
     @NotNull
