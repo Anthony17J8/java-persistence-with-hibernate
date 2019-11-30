@@ -1,10 +1,14 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import org.hibernate.annotations.GenerationTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -37,8 +41,24 @@ public class Item {
     @Future
     protected Date auctionEnd;
 
-    @Column(name = "START_PRICE", nullable = false)
+    @org.hibernate.annotations.ColumnDefault("1.00")
+    @org.hibernate.annotations.Generated(value = GenerationTime.INSERT)
+    @Column(name = "START_PRICE", insertable = false)
     protected BigDecimal initialPrice;
+
+    // assume that a database trigger will keep the lastModified property current
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(insertable = false, updatable = false)
+    @org.hibernate.annotations.Generated(
+            org.hibernate.annotations.GenerationTime.ALWAYS
+    )
+    protected Date lastModified;
+
+    // JPA says @Temporal is required but Hibernate will default to TIMESTAMP without it
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(updatable = false)
+    @org.hibernate.annotations.CreationTimestamp
+    protected Date createdOn;
 
     @OneToMany(mappedBy = "item")
     protected Set<Bid> bids = new HashSet<>();
@@ -149,5 +169,21 @@ public class Item {
 
     public void setInitialPrice(BigDecimal initialPrice) {
         this.initialPrice = initialPrice;
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 }
