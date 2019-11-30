@@ -19,10 +19,9 @@ import java.util.Set;
 // disable generation of INSERT and UPDATE SQL statements on startup
 @org.hibernate.annotations.DynamicInsert
 @org.hibernate.annotations.DynamicUpdate
+@Access(AccessType.PROPERTY)
 public class Item {
 
-    @Id
-    @GeneratedValue(generator = Constants.ID_GENERATOR)
     protected Long id;
 
     @NotNull
@@ -31,18 +30,16 @@ public class Item {
             max = 255,
             message = "Name is required, maximum 255 characters."
     )
-    @Access(AccessType.PROPERTY)
     protected String name;
 
     @Future
     protected Date auctionEnd;
 
-    @Column(name = "START_PRICE", nullable = false)
+
     private BigDecimal initialPrice;
 
-    @OneToMany(mappedBy = "item")
-    protected Set<Bid> bids = new HashSet<>();
 
+    protected Set<Bid> bids = new HashSet<>();
 
     public Item() {
     }
@@ -51,10 +48,17 @@ public class Item {
         this.name = name;
     }
 
+    @Id
+    @GeneratedValue(generator = Constants.ID_GENERATOR)
     public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @OneToMany(mappedBy = "item")
     public Set<Bid> getBids() {
         return bids;
     }
@@ -76,6 +80,7 @@ public class Item {
         bid.setItem(this);
     }
 
+    @Access(AccessType.FIELD)
     public String getName() {
         return name;
     }
@@ -90,5 +95,14 @@ public class Item {
 
     public void setAuctionEnd(Date auctionEnd) {
         this.auctionEnd = auctionEnd;
+    }
+
+    @Column(name = "START_PRICE", nullable = false)
+    public BigDecimal getInitialPrice() {
+        return initialPrice;
+    }
+
+    public void setInitialPrice(BigDecimal initialPrice) {
+        this.initialPrice = initialPrice;
     }
 }
