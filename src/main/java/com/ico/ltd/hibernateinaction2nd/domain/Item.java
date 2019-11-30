@@ -34,15 +34,24 @@ public class Item {
     @Access(AccessType.PROPERTY)
     protected String name;
 
+    @NotNull
+    protected String description;
+
     @Future
     protected Date auctionEnd;
 
     @Column(name = "START_PRICE", nullable = false)
-    private BigDecimal initialPrice;
+    protected BigDecimal initialPrice;
 
     @OneToMany(mappedBy = "item")
     protected Set<Bid> bids = new HashSet<>();
 
+    // executes only during SELECTs
+    @org.hibernate.annotations.Formula(value = "substr(DESCRIPTION, 1, 12) || '...'")
+    protected String shortDescription;
+
+    @org.hibernate.annotations.Formula(value = "(select avg(b.AMOUNT) from BID b where b.ITEM_ID = ID)")
+    protected BigDecimal averageBidAmount;
 
     public Item() {
     }
@@ -90,5 +99,29 @@ public class Item {
 
     public void setAuctionEnd(Date auctionEnd) {
         this.auctionEnd = auctionEnd;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+
+    public BigDecimal getAverageBidAmount() {
+        return averageBidAmount;
+    }
+
+    public void setAverageBidAmount(BigDecimal averageBidAmount) {
+        this.averageBidAmount = averageBidAmount;
     }
 }
