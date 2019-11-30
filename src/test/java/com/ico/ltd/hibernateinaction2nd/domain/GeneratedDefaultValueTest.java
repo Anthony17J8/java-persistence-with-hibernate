@@ -1,5 +1,6 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,11 +19,17 @@ public class GeneratedDefaultValueTest {
     @Autowired
     EntityManager em;
 
+    Item saved;
+
+    @BeforeEach
+    void setUp() {
+        saved = new Item("Name", "Description");
+    }
+
     @Test
     @Rollback
     @Transactional
     void testGenerateDefaultValues() {
-        Item saved = new Item("Name", "Description");
         em.persist(saved);
         em.flush();
 
@@ -30,5 +37,17 @@ public class GeneratedDefaultValueTest {
 
         assertEquals(1., result.getInitialPrice().doubleValue());
         assertNotNull(result.getCreatedOn());
+    }
+
+    @Test
+    @Rollback
+    @Transactional
+    void testMappingEnumeration(){
+        em.persist(saved);
+        em.flush();
+
+        Item result = em.find(Item.class, 1000L);
+
+        assertEquals(AuctionType.HIGHEST_BID.name(), result.getAuctionType().name());
     }
 }

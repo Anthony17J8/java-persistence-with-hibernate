@@ -4,6 +4,8 @@ import org.hibernate.annotations.GenerationTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -77,6 +79,9 @@ public class Item {
             write = "? * 2.20462"
     )
     protected double metricWeight;
+
+    @Enumerated(EnumType.STRING) // Defaults to ORDINAL
+    protected AuctionType auctionType = AuctionType.HIGHEST_BID;
 
     public Item() {
     }
@@ -185,5 +190,13 @@ public class Item {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
+    }
+
+    public AuctionType getAuctionType() {
+        return auctionType;
+    }
+
+    public void setAuctionType(AuctionType auctionType) {
+        this.auctionType = auctionType;
     }
 }
