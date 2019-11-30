@@ -22,6 +22,7 @@ class ItemValidatorTest {
 
         Item item = new Item();
         item.setName("Some Item");
+        item.setDescription("Description");
         item.setAuctionEnd(new Date());
 
         Set<ConstraintViolation<Item>> violations = validator.validate(item);

@@ -1,5 +1,6 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import javax.transaction.Transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@Disabled
 public class AccessStrategyTest {
 
     @Autowired
@@ -22,8 +24,10 @@ public class AccessStrategyTest {
     void testAccessTypePropertyNameField() {
         final String name = "New Item Name";
         Item savedItem = new Item(name);
+        savedItem.setDescription("Description");
 
         em.persist(savedItem);
+        em.flush();
 
         Item result = em.find(Item.class, 1000L);
         assertEquals("AUCTION " + name, result.getName());

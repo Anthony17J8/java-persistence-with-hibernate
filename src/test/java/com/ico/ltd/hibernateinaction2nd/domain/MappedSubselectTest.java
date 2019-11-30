@@ -41,7 +41,7 @@ class MappedSubselectTest {
         );
 
         ItemBidSummary trueResult = (ItemBidSummary) query.setParameter("id", 1L).getSingleResult();
-        assertEquals("New name", trueResult.getName());
+        assertEquals("AUCTION New name", trueResult.getName());
         assertEquals(3, trueResult.getNumberOfBids());
     }
 }

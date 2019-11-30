@@ -3,6 +3,7 @@ package com.ico.ltd.hibernateinaction2nd.domain;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class DerivedPropertyTest {
     EntityManager em;
 
     @Test
+    @DirtiesContext
     void testReadOnlyDerivedProperty() {
         Item result = em.find(Item.class, 1L);
 
@@ -29,6 +31,7 @@ public class DerivedPropertyTest {
     @Test
     @Rollback
     @Transactional
+    @DirtiesContext
     void testTransformerColumnTest() {
         Item saved = new Item("Some Name", "Some descr");
         saved.setMetricWeight(2d);

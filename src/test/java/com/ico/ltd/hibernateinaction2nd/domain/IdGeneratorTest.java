@@ -30,7 +30,7 @@ class IdGeneratorTest {
 
         for (int i = 0; i < 10; i++) {
             Item result = em.find(Item.class, (long) 1000 + i);
-            assertEquals("New Name" + i, result.getName());
+            assertEquals("AUCTION New Name" + i, result.getName());
         }
     }
 }
