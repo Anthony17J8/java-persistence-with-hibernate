@@ -34,10 +34,8 @@ public class Item {
     @Future
     protected Date auctionEnd;
 
-   // check NOT NULL before execute SQL stmnt
-   //@Basic(optional = false)
-   //@NotNull
-    @Column(nullable = false)
+
+    @Column(name = "START_PRICE", nullable = false)
     private BigDecimal initialPrice;
 
     @OneToMany(mappedBy = "item")
