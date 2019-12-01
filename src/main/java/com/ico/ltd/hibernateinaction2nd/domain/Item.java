@@ -1,8 +1,10 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import com.ico.ltd.hibernateinaction2nd.domain.converters.MonetaryAmountConverter;
 import org.hibernate.annotations.GenerationTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -82,6 +84,10 @@ public class Item {
 
     @Enumerated(EnumType.STRING) // Defaults to ORDINAL
     protected AuctionType auctionType = AuctionType.HIGHEST_BID;
+
+    @Convert(converter = MonetaryAmountConverter.class) // optional: autoApply is enabled
+    @Column(name = "PRICE", length = 63)
+    protected MonetaryAmount buyNowPrice;
 
     public Item() {
     }
@@ -204,5 +210,13 @@ public class Item {
 
     public void setAuctionType(AuctionType auctionType) {
         this.auctionType = auctionType;
+    }
+
+    public MonetaryAmount getBuyNowPrice() {
+        return buyNowPrice;
+    }
+
+    public void setBuyNowPrice(MonetaryAmount buyNowPrice) {
+        this.buyNowPrice = buyNowPrice;
     }
 }
