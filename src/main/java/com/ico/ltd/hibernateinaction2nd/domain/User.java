@@ -1,8 +1,11 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import com.ico.ltd.hibernateinaction2nd.domain.converters.ZipcodeConverter;
+
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +21,8 @@ public class User implements Serializable {
     @GeneratedValue(generator = Constants.ID_GENERATOR)
     protected Long id;
 
+    @Convert(converter = ZipcodeConverter.class,
+            attributeName = "city.zipcode")
     protected Address homeAddress;
 
     @Embedded // not necessary (alternative to @Embeddable)

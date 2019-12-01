@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class ConverterTest {
@@ -21,16 +22,32 @@ public class ConverterTest {
     @Test
     @Rollback
     @Transactional
-    void testMonetaryAmountConverterTest() {
+    void testMonetaryAmountConverter() {
         Item saved = new Item("New Name", "Some Description");
         MonetaryAmount amount = new MonetaryAmount(new BigDecimal("11.22"), Currency.getInstance("USD"));
         saved.setBuyNowPrice(amount);
-        em.persist(saved);
-        em.flush();
 
-        Item result = em.find(Item.class, 1000L);
+        em.persist(saved);
+
+        Item result = em.find(Item.class, saved.getId());
         assertEquals(result.getBuyNowPrice(), amount);
         assertEquals(result.getBuyNowPrice().getValue(), new BigDecimal("11.22"));
         assertEquals(result.getBuyNowPrice().getCurrency(), Currency.getInstance("USD"));
+    }
+
+    @Test
+    @Rollback
+    @Transactional
+    void testZipcodeConverter() {
+        User saved = new User();
+        City city = new City("Some City", "Some country", new GermanZipcode("33352"));
+        Address homeAddress = new Address("Some street", city);
+        saved.setHomeAddress(homeAddress);
+
+        em.persist(saved);
+
+        User result = em.find(User.class, saved.getId());
+        assertTrue(result.getHomeAddress().getCity().getZipcode() instanceof GermanZipcode);
+        assertEquals(result.getHomeAddress().getCity().getZipcode().getValue(), "33352");
     }
 }
