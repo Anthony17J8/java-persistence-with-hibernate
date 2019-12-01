@@ -1,5 +1,7 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -13,19 +15,19 @@ public class Address {
     protected String street;
 
     @NotNull
-    @Column(nullable = false, length = 5)
-    protected String zipcode;
-
-    @NotNull
-    @Column(nullable = false)
-    protected String city;
+    @AttributeOverrides(
+            @AttributeOverride(
+                    name = "name",
+                    column = @Column(name = "CITY", nullable = false)
+            )
+    )
+    protected City city;
 
     protected Address() {
     }
 
-    public Address(String street, String zipcode, String city) {
+    public Address(String street, City city) {
         this.street = street;
-        this.zipcode = zipcode;
         this.city = city;
     }
 
@@ -35,21 +37,5 @@ public class Address {
 
     public void setStreet(String street) {
         this.street = street;
-    }
-
-    public String getZipCode() {
-        return zipcode;
-    }
-
-    public void setZipCode(String zipcode) {
-        this.zipcode = zipcode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 }

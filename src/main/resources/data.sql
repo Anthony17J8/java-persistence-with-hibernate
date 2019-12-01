@@ -8,7 +8,7 @@ VALUES (2, 1, 200);
 INSERT INTO BID(id, item_id, amount)
 VALUES (3, 1, 300);
 
-INSERT INTO USERS(id, street, zipcode, city)
-VALUES (1, 'Wall Street', '44542', 'New York');
-INSERT INTO USERS(id, street, zipcode, city)
-VALUES (2, 'Krasnay Street', '65444', 'Moscow');
+INSERT INTO USERS(id, street, zipcode, city, country)
+VALUES (1, 'Wall Street', '44542', 'New York', 'USA');
+INSERT INTO USERS(id, street, zipcode, city, country)
+VALUES (2, 'Krasnay Street', '65444', 'Moscow', 'Russia');
