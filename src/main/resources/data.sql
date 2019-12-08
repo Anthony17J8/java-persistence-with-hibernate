@@ -1,5 +1,5 @@
-INSERT INTO ITEM(id, auction_end, name, description, imperialweight, price)
-VALUES (1, '2099-10-10', 'Some name', 'Java: A Detailed Approach to Practical Coding (Step-By-Step Java Book 2)', 2, '11.33 RU');
+INSERT INTO ITEM(id, auction_end, name, description, imperialweight)
+VALUES (1, '2099-10-10', 'Some name', 'Java: A Detailed Approach to Practical Coding (Step-By-Step Java Book 2)', 2);
 
 INSERT INTO BID(id, item_id, amount)
 VALUES (1, 1, 100);

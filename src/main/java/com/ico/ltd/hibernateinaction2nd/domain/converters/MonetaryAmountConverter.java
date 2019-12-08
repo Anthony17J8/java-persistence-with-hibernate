@@ -5,7 +5,7 @@ import com.ico.ltd.hibernateinaction2nd.domain.MonetaryAmount;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-@Converter(autoApply = true)
+@Converter
 public class MonetaryAmountConverter implements AttributeConverter<MonetaryAmount, String> {
 
     @Override

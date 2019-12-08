@@ -1,10 +1,6 @@
 package com.ico.ltd.hibernateinaction2nd.domain;
 
-import com.ico.ltd.hibernateinaction2nd.domain.converters.MonetaryAmountConverter;
-import org.hibernate.annotations.GenerationTime;
-
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -45,10 +41,14 @@ public class Item {
     @Future
     protected Date auctionEnd;
 
-    @org.hibernate.annotations.ColumnDefault("1.00")
-    @org.hibernate.annotations.Generated(value = GenerationTime.INSERT)
-    @Column(name = "START_PRICE", insertable = false)
-    protected BigDecimal initialPrice;
+    @org.hibernate.annotations.Type(
+            type = "monetary_amount_usd"
+    )
+    @org.hibernate.annotations.Columns(columns = {
+            @Column(name = "INITIALPRICE_AMOUNT"),
+            @Column(name = "INITIALPRICE_CURRENCY", length = 3)
+    })
+    protected MonetaryAmount initialPrice;
 
     // assume that a database trigger will keep the lastModified property current
     @Temporal(TemporalType.TIMESTAMP)
@@ -85,8 +85,13 @@ public class Item {
     @Enumerated(EnumType.STRING) // Defaults to ORDINAL
     protected AuctionType auctionType = AuctionType.HIGHEST_BID;
 
-    @Convert(converter = MonetaryAmountConverter.class) // optional: autoApply is enabled
-    @Column(name = "PRICE", length = 63)
+    @org.hibernate.annotations.Type(
+            type = "monetary_amount_eur"
+    )
+    @org.hibernate.annotations.Columns(columns = {
+            @Column(name = "BUYNOWPRICE_AMOUNT"),
+            @Column(name = "BUYNOWPRICE_CURRENCY", length = 3)
+    })
     protected MonetaryAmount buyNowPrice;
 
     public Item() {
@@ -180,11 +185,11 @@ public class Item {
         this.metricWeight = metriceWeight;
     }
 
-    public BigDecimal getInitialPrice() {
+    public MonetaryAmount getInitialPrice() {
         return initialPrice;
     }
 
-    public void setInitialPrice(BigDecimal initialPrice) {
+    public void setInitialPrice(MonetaryAmount initialPrice) {
         this.initialPrice = initialPrice;
     }
 
