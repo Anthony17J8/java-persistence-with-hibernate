@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.implicitpolymorphism;
+package com.ico.ltd.hibernateinaction2nd.domain;
 
 public interface Constants {
 

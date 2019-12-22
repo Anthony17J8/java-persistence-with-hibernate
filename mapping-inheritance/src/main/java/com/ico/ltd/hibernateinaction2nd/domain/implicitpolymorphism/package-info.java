@@ -1,1 +1,0 @@
-package com.ico.ltd.hibernateinaction2nd.domain.implicitpolymorphism;
