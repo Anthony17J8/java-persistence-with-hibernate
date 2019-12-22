@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.withunions;
+package com.ico.ltd.hibernateinaction2nd.domain.tableperclass;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 
@@ -25,7 +25,6 @@ import javax.validation.constraints.NotNull;
  * ID, OWNER, EXPMONTH, EXPYEAR, CARDNUMBER,
  * null as ACCOUNT,
  * null as BANKNAME,
- * Mapping inheritance
  * null as SWIFT,
  * 1 as CLAZZ_
  * from

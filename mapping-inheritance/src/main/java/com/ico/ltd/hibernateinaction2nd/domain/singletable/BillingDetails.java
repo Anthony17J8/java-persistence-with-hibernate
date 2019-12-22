@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.tableperhierarchy;
+package com.ico.ltd.hibernateinaction2nd.domain.singletable;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 

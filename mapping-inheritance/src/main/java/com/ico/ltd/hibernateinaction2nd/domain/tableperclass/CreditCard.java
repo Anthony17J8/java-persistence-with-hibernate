@@ -1,11 +1,14 @@
-package com.ico.ltd.hibernateinaction2nd.domain.tableperhierarchy;
+package com.ico.ltd.hibernateinaction2nd.domain.tableperclass;
 
-import javax.persistence.DiscriminatorValue;
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@DiscriminatorValue("CC")
+@AttributeOverride(
+        name = "owner",
+        column = @Column(name = "CC_OWNER", nullable = false))
 public class CreditCard extends BillingDetails {
 
     @NotNull

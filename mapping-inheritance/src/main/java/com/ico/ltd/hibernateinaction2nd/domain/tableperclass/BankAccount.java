@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.withunions;
+package com.ico.ltd.hibernateinaction2nd.domain.tableperclass;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
