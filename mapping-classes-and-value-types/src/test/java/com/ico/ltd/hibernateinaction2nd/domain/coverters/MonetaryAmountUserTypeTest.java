@@ -1,7 +1,8 @@
-package com.ico.ltd.hibernateinaction2nd.domain.converters;
+package com.ico.ltd.hibernateinaction2nd.domain.coverters;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Item;
 import com.ico.ltd.hibernateinaction2nd.domain.MonetaryAmount;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.Currency;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class MonetaryAmountUserTypeTest {
@@ -36,7 +35,7 @@ class MonetaryAmountUserTypeTest {
                 .setParameter("itemId", 1000L)
                 .getSingleResult();
 
-        assertEquals("4.00 EUR", result.getBuyNowPrice().toString());
-        assertEquals("6.00 USD", result.getInitialPrice().toString());
+        Assertions.assertEquals("4.00 EUR", result.getBuyNowPrice().toString());
+        Assertions.assertEquals("6.00 USD", result.getInitialPrice().toString());
     }
 }

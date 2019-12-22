@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd;
+package com.ico.ltd.hibernateinaction2nd.domain;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
