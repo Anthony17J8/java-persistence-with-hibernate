@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<modules>
-		<module>mapping-inheritance</module>
+		<module>model</module>
 		<module>mapping-classes-and-value-types</module>
 	</modules>
 	<parent>
