@@ -1,12 +1,23 @@
-package com.ico.ltd.hibernateinaction2nd.domain.joined;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.implicitpolymorphism;
 
+import com.ico.ltd.hibernateinaction2nd.domain.Constants;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@PrimaryKeyJoinColumn(name = "CREDITCARD_ID")
+@AttributeOverride(
+        name = "owner",
+        column = @Column(name = "CC_OWNER", nullable = false))
 public class CreditCard extends BillingDetails {
+
+    @Id
+    @GeneratedValue(generator = Constants.ID_GENERATOR)
+    protected Long id;
 
     @NotNull
     protected String cardNumber;

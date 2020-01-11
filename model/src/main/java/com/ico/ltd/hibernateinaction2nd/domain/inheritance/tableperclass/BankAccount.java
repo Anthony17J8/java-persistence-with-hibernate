@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.joined;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.tableperclass;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;

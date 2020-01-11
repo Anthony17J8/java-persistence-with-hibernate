@@ -1,10 +1,18 @@
-package com.ico.ltd.hibernateinaction2nd.domain.tableperclass;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.implicitpolymorphism;
+
+import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 @Entity
 public class BankAccount extends BillingDetails {
+
+    @Id
+    @GeneratedValue(generator = Constants.ID_GENERATOR)
+    protected Long id;
 
     @NotNull
     protected String account;

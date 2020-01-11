@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.embeddable;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.embeddable;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 

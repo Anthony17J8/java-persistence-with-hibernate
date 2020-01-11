@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.singletable;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.singletable;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 

@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.tableperclass;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.tableperclass;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 

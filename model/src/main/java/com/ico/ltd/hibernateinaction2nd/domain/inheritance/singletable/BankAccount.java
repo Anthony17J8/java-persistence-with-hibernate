@@ -1,9 +1,11 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.manytoone;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.singletable;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@DiscriminatorValue("BA")
 public class BankAccount extends BillingDetails {
 
     @NotNull
@@ -24,6 +26,10 @@ public class BankAccount extends BillingDetails {
         this.account = account;
         this.bankname = bankname;
         this.swift = swift;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getAccount() {

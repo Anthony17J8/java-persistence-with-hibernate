@@ -1,9 +1,14 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.manytoone;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.tableperclass;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@AttributeOverride(
+        name = "owner",
+        column = @Column(name = "CC_OWNER", nullable = false))
 public class CreditCard extends BillingDetails {
 
     @NotNull
@@ -24,6 +29,10 @@ public class CreditCard extends BillingDetails {
         this.cardNumber = cardNumber;
         this.expMonth = expMonth;
         this.expYear = expYear;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getCardNumber() {
@@ -48,10 +57,5 @@ public class CreditCard extends BillingDetails {
 
     public void setExpYear(String expYear) {
         this.expYear = expYear;
-    }
-
-    @Override
-    public void pay(int amount) {
-        System.out.println("Credit card: pay operation completed");
     }
 }

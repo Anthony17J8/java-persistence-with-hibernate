@@ -1,11 +1,9 @@
-package com.ico.ltd.hibernateinaction2nd.domain.singletable;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.joined;
 
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@DiscriminatorValue("BA")
 public class BankAccount extends BillingDetails {
 
     @NotNull

@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.implicitpolymorphism;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.implicitpolymorphism;
 
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;

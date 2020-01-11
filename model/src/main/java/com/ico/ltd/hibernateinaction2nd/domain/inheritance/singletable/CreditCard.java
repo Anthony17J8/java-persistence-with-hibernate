@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.singletable;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.singletable;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

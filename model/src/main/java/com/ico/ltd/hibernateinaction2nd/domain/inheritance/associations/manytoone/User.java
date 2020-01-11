@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.manytoone;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.associations.manytoone;
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
 

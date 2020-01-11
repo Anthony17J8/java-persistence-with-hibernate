@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.mixed;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.mixed;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;

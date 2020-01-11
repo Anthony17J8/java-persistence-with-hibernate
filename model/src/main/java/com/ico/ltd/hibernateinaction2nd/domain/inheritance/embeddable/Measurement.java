@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.embeddable;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.embeddable;
 
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;

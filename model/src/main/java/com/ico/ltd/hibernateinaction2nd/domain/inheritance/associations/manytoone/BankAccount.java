@@ -1,18 +1,10 @@
-package com.ico.ltd.hibernateinaction2nd.domain.implicitpolymorphism;
-
-import com.ico.ltd.hibernateinaction2nd.domain.Constants;
+package com.ico.ltd.hibernateinaction2nd.domain.inheritance.associations.manytoone;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 @Entity
 public class BankAccount extends BillingDetails {
-
-    @Id
-    @GeneratedValue(generator = Constants.ID_GENERATOR)
-    protected Long id;
 
     @NotNull
     protected String account;
@@ -32,10 +24,6 @@ public class BankAccount extends BillingDetails {
         this.account = account;
         this.bankname = bankname;
         this.swift = swift;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getAccount() {
