@@ -20,7 +20,14 @@ public class Item {
 
     protected String name;
 
-    @OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+
+    // The orphanRemoval=true argument tells Hibernate that you want to permanently
+    // remove a Bid when it’s removed from the collection.
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.PERSIST,
+            orphanRemoval = true // this includes CascadeType.REMOVE
+    )
     protected Set<Bid> bids = new HashSet<>();
 
     public Item() {
