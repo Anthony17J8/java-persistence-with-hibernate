@@ -2,6 +2,7 @@ package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadeop
 
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -20,7 +21,11 @@ public class Item {
 
     protected String name;
 
-    @OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.PERSIST)
+    // affects only schema generation by Hibernate
+    @org.hibernate.annotations.OnDelete(action = OnDeleteAction.CASCADE)
     protected Set<Bid> bids = new HashSet<>();
 
     public Item() {
