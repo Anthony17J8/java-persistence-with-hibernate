@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadepersist;
+package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadeoperations;
 
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;

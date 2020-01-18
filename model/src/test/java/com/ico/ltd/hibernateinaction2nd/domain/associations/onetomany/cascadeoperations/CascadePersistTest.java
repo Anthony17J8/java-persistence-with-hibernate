@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadepersist;
+package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadeoperations;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

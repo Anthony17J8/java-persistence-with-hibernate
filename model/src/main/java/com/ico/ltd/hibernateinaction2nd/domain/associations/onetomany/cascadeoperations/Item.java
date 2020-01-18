@@ -1,4 +1,4 @@
-package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadepersist;
+package com.ico.ltd.hibernateinaction2nd.domain.associations.onetomany.cascadeoperations;
 
 
 import com.ico.ltd.hibernateinaction2nd.domain.Constants;
@@ -20,7 +20,7 @@ public class Item {
 
     protected String name;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     protected Set<Bid> bids = new HashSet<>();
 
     public Item() {
