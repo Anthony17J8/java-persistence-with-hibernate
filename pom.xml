@@ -6,6 +6,7 @@
 	<modules>
 		<module>model</module>
 		<module>mapping-classes-and-value-types</module>
+		<module>managing-data</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
