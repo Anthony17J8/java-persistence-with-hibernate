@@ -16,6 +16,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceUnitUtil;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertFalse;
@@ -333,6 +334,82 @@ class SimpleTransitionsTest {
             tx.commit(); // Flush: Dirty check and SQL UPDATE
             em.close();
 
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void testPersistenceContextCacheAndSelectiveReadOnly() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            Item someItem = new Item();
+            someItem.setName("Some Name");
+
+            em.persist(someItem);
+
+            tx.commit();
+            em.close();
+
+            Long itemId = someItem.getId();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            {
+                Item item = em.find(Item.class, itemId);
+                assertTrue(em.contains(item));
+                em.detach(item);        // manually evict instance from persistence context
+                assertFalse(em.contains(item));
+            }
+
+            {
+                em.unwrap(Session.class).setDefaultReadOnly(true);
+                Item item = em.find(Item.class, itemId);
+                item.setName("New Name"); // NO UPDATE
+            }
+
+            {
+                em.clear();
+                Item item = em.find(Item.class, itemId);
+                assertNotEquals("New Name", item.getName());
+            }
+
+            {
+                org.hibernate.query.Query<Item> query = em.unwrap(Session.class)
+                        .createQuery("select i from Item i", Item.class);
+
+                query.setReadOnly(true).list();
+
+                List<Item> result = query.list();
+
+                for (Item item : result)
+                    item.setName("New Name");
+
+                em.flush(); // No UPDATE
+            }
+            {
+                List<Item> items = em.createQuery("select i from Item i", Item.class)
+                        .setHint(
+                                org.hibernate.annotations.QueryHints.READ_ONLY,
+                                true
+                        ).getResultList();
+
+                for (Item item : items)
+                    item.setName("New Name");
+                em.flush(); // No UPDATE
+            }
+            {
+                em.clear();
+                Item item = em.find(Item.class, itemId);
+                assertNotEquals("New Name", item.getName());
+            }
+
+            tx.commit();
+            em.close();
         } finally {
             tx.rollback();
         }
