@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceUnitUtil;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -409,6 +410,49 @@ class SimpleTransitionsTest {
             }
 
             tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void flushModeType() throws Exception {
+        EntityTransaction tx = em.getTransaction();
+        Long itemId;
+        try {
+            tx.begin();
+
+            Item someItem = new Item();
+            someItem.setName("Original Name");
+
+            em.persist(someItem);
+            tx.commit();
+            em.close();
+
+            itemId = someItem.getId();
+        } finally {
+            tx.rollback();
+        }
+
+        try {
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item item = em.find(Item.class, itemId);
+            item.setName("New Name");
+
+            // Disable flushing before queries:
+            em.setFlushMode(FlushModeType.COMMIT);
+
+            assertEquals(
+                    em.createQuery("select i.name from Item i where i.id = :id")
+                            .setParameter("id", itemId).getSingleResult(),
+                    "Original Name"
+            );
+
+            tx.commit(); // Flush!
             em.close();
         } finally {
             tx.rollback();
