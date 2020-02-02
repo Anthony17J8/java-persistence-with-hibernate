@@ -46,6 +46,7 @@ public class PersistenceConfig {
                 "hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         properties.setProperty("hibernate.format_sql", "true");
         properties.setProperty("hibernate.use_sql_comments", "true");
+        properties.setProperty("hibernate.use_identifier_rollback", "true");
         return properties;
     }
 
