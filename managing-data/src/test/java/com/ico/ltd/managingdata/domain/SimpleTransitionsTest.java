@@ -2,6 +2,7 @@ package com.ico.ltd.managingdata.domain;
 
 import com.ico.ltd.managingdata.config.PersistenceConfig;
 import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceUnitUtil;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -262,6 +267,72 @@ class SimpleTransitionsTest {
             assertNull(item);
             tx.commit();
             em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void refresh() throws Exception {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Item someItem = new Item();
+            someItem.setName("Some Name");
+
+            em.persist(someItem);
+            tx.commit();
+            em.close();
+
+            Long itemId = someItem.getId();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+            Item item = em.find(Item.class, itemId);
+            item.setName("New Name");
+
+            // someone updates this row in the database
+            Executors.newSingleThreadExecutor().submit(() -> {
+                EntityManager sEm = emf.createEntityManager();
+                EntityTransaction sTx = sEm.getTransaction();
+                try {
+                    sTx.begin();
+
+                    Session session = sEm.unwrap(Session.class);
+                    session.doWork((con) -> {
+                        PreparedStatement ps = con.prepareStatement("update ITEM set name = ? where ID = ?");
+                        ps.setString(1, "Concurrent Update Name");
+                        ps.setLong(2, itemId);
+
+                    /* Alternative: you get an EntityNotFoundException on refresh
+                                PreparedStatement ps = con.prepareStatement("delete from ITEM where ID = ?");
+                                ps.setLong(1, ITEM_ID);
+                    */
+
+                        if (ps.executeUpdate() != 1) {
+                            throw new SQLException("ITEM row was not updated");
+                        }
+
+                    });
+                    sTx.commit();
+                    sEm.close();
+                } catch (Exception exc) {
+                    sTx.rollback();
+                    sEm.close();
+                    throw new RuntimeException("Concurrent operation failure: " + exc, exc);
+                }
+                return null;
+            }).get();
+
+            String oldName = item.getName();
+            em.refresh(item);
+            assertNotEquals(oldName, item.getName());
+            assertEquals("Concurrent Update Name", item.getName());
+
+            tx.commit(); // Flush: Dirty check and SQL UPDATE
+            em.close();
+
         } finally {
             tx.rollback();
         }
