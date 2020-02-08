@@ -517,4 +517,53 @@ class SimpleTransitionsTest {
             tx.rollback();
         }
     }
+
+    @Test
+    void businessKeyEqualityForDetached() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            User someUser = new User("johndoe");
+
+            em.persist(someUser);
+            tx.commit();
+            em.close();
+
+            Long userId = someUser.getId();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+            User a = em.find(User.class, userId);
+            User b = em.find(User.class, userId);
+
+            assertSame(a, b);
+            assertEquals(a, b);
+            assertEquals(a.getId(), b.getId());
+
+            tx.commit();
+            em.close();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            User c = em.find(User.class, userId);
+            assertNotSame(a, c);
+            assertEquals(a, c);
+            assertEquals(a.getId(), c.getId());
+
+            tx.commit();
+            em.close();
+
+            Set<User> users = new HashSet<>();
+            users.add(a);
+            users.add(b);
+            users.add(c);
+            assertEquals(1, users.size());
+
+        } finally {
+            tx.rollback();
+        }
+    }
 }
