@@ -566,4 +566,37 @@ class SimpleTransitionsTest {
             tx.rollback();
         }
     }
+
+    @Test
+    void detachInstance() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Item someItem = new Item();
+            someItem.setName("Some Item");
+
+            em.persist(someItem);
+            tx.commit();
+            em.close();
+
+            Long itemId = someItem.getId();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item item = em.find(Item.class, itemId);
+
+            assertTrue(em.contains(item));
+
+            em.detach(item);
+
+            assertFalse(em.contains(item));
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
 }
