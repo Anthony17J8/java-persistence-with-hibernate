@@ -599,4 +599,48 @@ class SimpleTransitionsTest {
             tx.rollback();
         }
     }
+
+    @Test
+    void mergeDetached() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Item someItem = new Item();
+            someItem.setName("Some Name");
+
+            em.persist(someItem);
+            tx.commit();
+            em.close();
+
+            Long itemId = someItem.getId();
+
+            someItem.setName("New Name");
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item merged = em.merge(someItem);
+            assertEquals("New Name", merged.getName());
+            // discard 'detached item' reference after merging!
+
+            // 'Merged item' is in persistent state
+            merged.setName("Final Name");
+
+            tx.commit();
+            em.close();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item item = em.find(Item.class, itemId);
+            assertEquals("Final Name", item.getName());
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
 }
