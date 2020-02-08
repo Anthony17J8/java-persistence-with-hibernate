@@ -17,11 +17,14 @@ import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceUnitUtil;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -454,6 +457,62 @@ class SimpleTransitionsTest {
 
             tx.commit(); // Flush!
             em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    /**
+     * Whenever you work with instances in detached state and you test them for equality (usually in
+     * hash-based collections), you need to supply your own implementation of the equals() and
+     * hashCode() methods for your mapped entity class. This is an important issue: if you don’t
+     * work with entity instances in detached state, no action is needed, and the default
+     * equals() implementation of java.lang.Object is fine.
+     */
+    @Test
+    void identityOfDetachedInstances() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Item someItem = new Item();
+            someItem.setName("Some Name");
+
+            em.persist(someItem);
+            tx.commit();
+            em.close();
+
+            Long itemId = someItem.getId();
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item a = em.find(Item.class, itemId);
+            Item b = em.find(Item.class, itemId);
+            assertSame(a, b);
+            assertEquals(a, b);
+            assertEquals(a.getId(), b.getId());
+
+            tx.commit();
+            em.close(); // persistence context is gone, a' and 'b' are now references to instances in detached state!
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+
+            Item c = em.find(Item.class, itemId);
+            assertNotSame(a, c); // The 'a' reference is still detached!
+            assertNotEquals(a, c);
+            assertEquals(a.getId(), c.getId());
+
+            tx.commit();
+            em.close();
+
+            Set<Item> items = new HashSet<>();
+            items.add(a);
+            items.add(b);
+            items.add(c);
+            assertEquals(2, items.size());  // That seems wrong and arbitrary!
         } finally {
             tx.rollback();
         }
