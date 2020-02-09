@@ -6,7 +6,8 @@
 	<modules>
 		<module>model</module>
 		<module>mapping-classes-and-value-types</module>
-	</modules>
+        <module>concurrency</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
