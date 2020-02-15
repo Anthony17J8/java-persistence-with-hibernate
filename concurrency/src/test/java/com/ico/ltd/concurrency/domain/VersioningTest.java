@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 import java.math.BigDecimal;
@@ -196,5 +197,132 @@ class VersioningTest {
         private TestData categories;
 
         private TestData items;
+    }
+
+    @Test
+    void forceVersionIncrement() throws Exception {
+        final TestData testData = storeItemAndBids();
+        Long ITEM_ID = testData.getFirstId();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            /*
+               The <code>find()</code> method accepts a <code>LockModeType</code>. The
+               <code>OPTIMISTIC_FORCE_INCREMENT</code> mode tells Hibernate that the version
+               of the retrieved <code>Item</code> should be incremented after loading,
+               even if it's never modified in the unit of work.
+             */
+            Item item = em.find(
+                    Item.class,
+                    ITEM_ID,
+                    LockModeType.OPTIMISTIC_FORCE_INCREMENT
+            );
+
+            Bid highestBid = queryHighestBid(em, item);
+
+            // Now a concurrent transaction will place a bid for this item, and
+            // succeed because the first commit wins!
+            Executors.newSingleThreadExecutor().submit(() -> {
+                EntityManager sEm = emf.createEntityManager();
+                EntityTransaction sTx = sEm.getTransaction();
+                try {
+                    sTx.begin();
+
+                    Item item2 = sEm.find(
+                            Item.class,
+                            ITEM_ID,
+                            LockModeType.OPTIMISTIC_FORCE_INCREMENT
+                    );
+
+                    Bid highestBid2 = queryHighestBid(sEm, item);
+
+                    try {
+                        Bid newBid = new Bid(
+                                new BigDecimal("44.44"),
+                                item2,
+                                highestBid2
+                        );
+                        sEm.persist(newBid);
+                    } catch (InvalidBidException ex) {
+                        // Ignore
+                    }
+                } catch (Exception exc) {
+                    sTx.rollback();
+                    throw new RuntimeException("Concurrent operation failure: " + exc);
+                }
+
+                sTx.commit();
+                sEm.close();
+
+            }).get();
+
+            try {
+                /*
+                   The code persists a new <code>Bid</code> instance; this does not affect
+                   any values of the <code>Item</code> instance. A new row will be inserted
+                   into the <code>BID</code> table. Hibernate would not detect concurrently
+                   made bids at all without a forced version increment of the
+                   <code>Item</code>. We also use a checked exception to validate the
+                   new bid amount; it must be greater than the currently highest bid.
+                */
+                Bid newBid = new Bid(
+                        new BigDecimal("44.44"),
+                        item,
+                        highestBid
+                );
+                em.persist(newBid);
+            } catch (InvalidBidException ex) {
+                // Bid too low, show a validation error screen...
+            }
+
+            /*
+               When flushing the persistence context, Hibernate will execute an
+               <code>INSERT</code> for the new <code>Bid</code> and force an
+               <code>UPDATE</code> of the <code>Item</code> with a version check.
+               If someone modified the <code>Item</code> concurrently, or placed a
+               <code>Bid</code> concurrently with this procedure, Hibernate throws
+               an exception.
+             */
+            assertThrows(RollbackException.class, tx::commit);
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    private Bid queryHighestBid(EntityManager em, Item item) {
+        // Can't scroll with cursors in JPA, have to use setMaxResult()
+        try {
+            return (Bid) em.createQuery(
+                    "select b from Bid b" +
+                            " where b.item = :itm" +
+                            " order by b.amount desc"
+            )
+                    .setParameter("itm", item)
+                    .setMaxResults(1)
+                    .getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
+
+    }
+
+    private TestData storeItemAndBids() throws Exception {
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        Long[] ids = new Long[1];
+        Item item = new Item("Some Item");
+        em.persist(item);
+        ids[0] = item.getId();
+        for (int i = 1; i <= 3; i++) {
+            Bid bid = new Bid(new BigDecimal(10 + i), item);
+            em.persist(bid);
+        }
+        tx.commit();
+        em.close();
+        return new TestData(ids);
     }
 }
