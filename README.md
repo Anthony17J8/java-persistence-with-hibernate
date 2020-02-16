@@ -1,0 +1,1 @@
+##### Code examples from the [book Java Persistence with Hibernate](https://www.amazon.com/Java-Persistence-Hibernate-Christian-Bauer/dp/1617290459) 
