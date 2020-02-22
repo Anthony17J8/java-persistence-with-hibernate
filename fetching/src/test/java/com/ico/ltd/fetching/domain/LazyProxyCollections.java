@@ -18,6 +18,8 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceUtil;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -206,5 +208,55 @@ class LazyProxyCollections {
         testData.items = new TestData(itemIds);
         testData.users = new TestData(userIds);
         return testData;
+    }
+
+    @Test
+    void lazyCollections() throws Exception {
+        FetchTestData testData = storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            long ITEM_ID = testData.items.getFirstId();
+
+            {
+                Item item = em.find(Item.class, ITEM_ID);
+                // select * from ITEM wher ID = ?
+
+                Set<Bid> bids = item.getBids(); // Collection is not initialized
+                PersistenceUtil persistenceUtil = Persistence.getPersistenceUtil();
+
+                assertFalse(persistenceUtil.isLoaded(item, "bids"));
+
+                // It's a Set
+                assertTrue(Set.class.isAssignableFrom(bids.getClass()));
+
+                // It's not a HashSet
+                assertNotEquals(bids.getClass(), HashSet.class);
+                assertEquals(bids.getClass(), org.hibernate.collection.internal.PersistentSet.class);
+
+                Bid firstBid = bids.iterator().next();
+                // select * from BID where ITEM_ID = ?
+
+                // Alternative: Hibernate.initialize(bids);
+            }
+            em.clear();
+            {
+                Item item = em.find(Item.class, ITEM_ID);
+                // select * from ITEM where ID = ?
+
+                /*
+                    With LazyCollectionOption.EXTRA , the collection supports operations that don’t
+                    trigger initialization.
+                    The size() operation triggers a SELECT COUNT() SQL query but doesn’t load the bids
+                    into memory.
+                 */
+                assertEquals(item.getBids().size(), 3);
+                // select count(b) from BID b where b.ITEM_ID = ?
+            }
+
+        } finally {
+            tx.rollback();
+        }
     }
 }
