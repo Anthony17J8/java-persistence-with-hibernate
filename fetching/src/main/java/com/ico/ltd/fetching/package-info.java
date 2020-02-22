@@ -11,4 +11,4 @@
                         value = "1000"
                 )
         })
-package com.ico.ltd.concurrency;
+package com.ico.ltd.fetching;

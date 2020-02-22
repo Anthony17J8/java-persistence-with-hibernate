@@ -1,4 +1,4 @@
-package com.ico.ltd.concurrency;
+package com.ico.ltd.fetching;
 
 public interface Constants {
 
