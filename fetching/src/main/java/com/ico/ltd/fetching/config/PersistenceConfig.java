@@ -21,7 +21,7 @@ public class PersistenceConfig {
     LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean emf =
                 new LocalContainerEntityManagerFactoryBean();
-        emf.setPackagesToScan("com.ico.ltd.concurrency.domain");
+        emf.setPackagesToScan("com.ico.ltd.fetching.domain");
         emf.setDataSource(createDataSource());
         emf.setJpaVendorAdapter(createJpaVendorAdapter());
         emf.setJpaProperties(createHibernateProperties());
