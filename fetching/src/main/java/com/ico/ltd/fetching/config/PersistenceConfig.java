@@ -1,5 +1,6 @@
 package com.ico.ltd.fetching.config;
 
+import com.ico.ltd.fetching.FetchTestLoadEventListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -54,4 +55,8 @@ public class PersistenceConfig {
         return new JpaTransactionManager(emf);
     }
 
+    @Bean
+    FetchTestLoadEventListener loadEventListener(EntityManagerFactory emf) {
+        return new FetchTestLoadEventListener(emf);
+    }
 }

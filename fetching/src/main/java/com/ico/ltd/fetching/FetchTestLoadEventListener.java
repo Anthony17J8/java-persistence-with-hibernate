@@ -1,4 +1,4 @@
-package com.ico.ltd.fetching.util;
+package com.ico.ltd.fetching;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -29,7 +29,7 @@ public class FetchTestLoadEventListener implements PostLoadEventListener {
     @Override
     public void onPostLoad(PostLoadEvent event) {
         Class entityType = event.getEntity().getClass();
-        loadCount.computeIfPresent(entityType, (k, v) -> v + 1);
+        loadCount.merge(entityType, 1, (v1, v2) -> v1 + 1);
     }
 
     public int getLoadCount(Class entityType) {
