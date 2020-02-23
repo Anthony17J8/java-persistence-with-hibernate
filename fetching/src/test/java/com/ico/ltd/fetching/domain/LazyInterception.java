@@ -46,6 +46,7 @@ class LazyInterception {
 
                 assertTrue(Hibernate.isInitialized(user));
             }
+
             em.clear();
 
             {
@@ -67,6 +68,33 @@ class LazyInterception {
 
             tx.commit();
             em.close();
+        } finally {
+            tx.rollback();
+        }
+
+    }
+
+    @Test
+    void lazyBasic() throws Exception {
+        FetchTestData testData = storeTestData();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Long ITEM_ID = testData.items.getFirstId();
+
+            Item item = em.find(Item.class, ITEM_ID);
+            // select NAME, AUCTIONEND, ... from ITEM where ID = ?
+
+            // Accessing one loads _all_ lazy properties (description, seller, ...)
+            assertTrue(item.getDescription().length() > 0);
+            // select DESCRIPTION from ITEM where ID = ?
+            // select * from USERS where ID = ?
+
+            tx.commit();
+            em.close();
+
         } finally {
             tx.rollback();
         }
