@@ -12,4 +12,15 @@
     <artifactId>fetching</artifactId>
 
 
+    <dependencies>
+
+        <!-- Hibernate Metamodel annotation processor will be detected by the Java compiler -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+            <version>${hibernate.version}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
 </project>
