@@ -8,7 +8,8 @@
 		<module>mapping-classes-and-value-types</module>
         <module>concurrency</module>
 		<module>fetching</module>
-	</modules>
+        <module>filtering</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
