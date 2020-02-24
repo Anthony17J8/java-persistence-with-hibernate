@@ -1,4 +1,4 @@
-package com.ico.ltd.filtering.config.domain;
+package com.ico.ltd.filtering.domain;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

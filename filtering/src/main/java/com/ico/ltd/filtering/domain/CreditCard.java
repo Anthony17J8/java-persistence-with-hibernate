@@ -1,4 +1,4 @@
-package com.ico.ltd.filtering.config.domain;
+package com.ico.ltd.filtering.domain;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;

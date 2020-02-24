@@ -1,4 +1,4 @@
-package com.ico.ltd.filtering.config.domain;
+package com.ico.ltd.filtering.domain;
 
 import com.ico.ltd.filtering.config.PersistenceConfig;
 import org.junit.jupiter.api.Test;
