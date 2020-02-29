@@ -1,6 +1,7 @@
 package com.ico.ltd.filtering.domain;
 
 import com.ico.ltd.filtering.config.PersistenceConfig;
+import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -243,5 +244,57 @@ class Cascade {
         } finally {
             tx.rollback();
         }
+    }
+
+    @Test
+    void cascadeReplicate() {
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        Long ITEM_ID;
+
+        try {
+            {
+                tx.begin();
+
+                User user = new User("johndoe");
+                em.persist(user);
+
+                Item item = new Item("Some Item", user);
+                em.persist(item);
+                ITEM_ID = item.getId();
+
+                tx.commit();
+                em.close();
+            }
+
+            em = emf.createEntityManager();
+            tx = em.getTransaction();
+            tx.begin();
+            Item item = em.find(Item.class, ITEM_ID);
+
+            // Initialize the lazy Item#seller
+            assertNotNull(item.getSeller().getUsername());
+
+            tx.commit();
+            em.close();
+
+            EntityManager otherDatabase = emf.createEntityManager();
+            tx = otherDatabase.getTransaction();
+            tx.begin();
+
+            otherDatabase.unwrap(Session.class).replicate(item, ReplicationMode.OVERWRITE);
+            // select ID from ITEM where ID = ?
+            // select ID from USERS where ID = ?
+
+            tx.commit();
+            // update ITEM set NAME = ?, SELLER_ID = ?, ... where ID = ?
+            // update USERS set USERNAME = ?, ... where ID = ?
+            otherDatabase.close();
+
+        } finally {
+            tx.rollback();
+        }
+
     }
 }
