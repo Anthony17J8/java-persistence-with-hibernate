@@ -22,12 +22,7 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     @org.hibernate.annotations.Filter(
-        name = "limitByUserRank",
-        condition =
-            ":currentUserRank >= (" +
-                    "select u.RANK from USERS u " +
-                    "where u.ID = SELLER_ID" +
-                ")"
+            name = "limitByUserRankDefault"
     )
     protected Set<Item> items = new HashSet<Item>();
 

@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -18,6 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = PersistenceConfig.class)
@@ -32,6 +34,7 @@ class DynamicFilter {
      * Hibernate doesn’t apply filters to retrieval by identifier operations.
      */
     @Test
+    @DirtiesContext
     void filterItems() throws Exception {
         storeTestData();
         em = emf.createEntityManager();
@@ -68,6 +71,38 @@ class DynamicFilter {
                     em.createQuery("select i from Item i", Item.class)
                             .getResultList();
             assertThat(items, Matchers.hasSize(3));
+
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    @DirtiesContext
+    void filterCollection() throws Exception {
+        DynamicFilterTestData testData = storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            Long CATEGORY_ID = testData.categories.getFirstId();
+            tx.begin();
+
+            org.hibernate.Filter filter = em.unwrap(Session.class)
+                    .enableFilter("limitByUserRankDefault");
+
+            filter.setParameter("currentUserRank", 0);
+            Category category = em.find(Category.class, CATEGORY_ID);
+            assertEquals(category.getItems().size(), 1);
+
+            em.clear();
+
+            filter.setParameter("currentUserRank", 100);
+            category = em.find(Category.class, CATEGORY_ID);
+            assertEquals(category.getItems().size(), 2);
+
+            tx.commit();
+            em.close();
 
         } finally {
             tx.rollback();
