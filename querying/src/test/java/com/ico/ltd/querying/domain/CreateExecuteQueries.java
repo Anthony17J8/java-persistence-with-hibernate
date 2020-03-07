@@ -525,4 +525,41 @@ public class CreateExecuteQueries extends QueryingTest {
             tx.rollback();
         }
     }
+
+    @Test
+    void namedQueryWithAnnotation() throws Exception {
+        TestDataCategoriesItems testData = storeTestData();
+        Long ITEM_ID = testData.items.getFirstId();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            {
+                TypedQuery<Item> query = em.createNamedQuery("findItemById", Item.class)
+                        .setParameter("itemId", ITEM_ID);
+
+                Item item = query.getSingleResult();
+
+                assertEquals(ITEM_ID, item.getId());
+                assertEquals("Foo", item.getName());
+            }
+            em.clear();
+            {
+                TypedQuery<Item> query = em.createNamedQuery("findItemsOrderByName", Item.class);
+                List<Item> items =query.getResultList();
+
+                assertThat(items, Matchers.hasSize(3));
+                assertEquals("Foo", items.get(0).getName());
+                assertEquals("Baz", items.get(1).getName());
+                assertEquals("Bar", items.get(2).getName());
+            }
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
 }

@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -20,6 +22,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+@NamedQueries({
+        @NamedQuery(name = "findItemById",
+                query = "SELECT i FROM Item i WHERE i.id = :itemId")
+})
 @Entity
 public class Item {
 
