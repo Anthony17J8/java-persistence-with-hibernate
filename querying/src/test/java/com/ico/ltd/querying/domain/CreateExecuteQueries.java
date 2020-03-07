@@ -209,7 +209,37 @@ public class CreateExecuteQueries extends QueryingTest {
                 items = query.getResultList();
                 assertThat(items, Matchers.hasSize(1));
             }
+            tx.commit();
+            em.close();
 
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void positionalParameterBinding() throws Exception {
+        storeTestData();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            String searchString = "B%";
+            Date tomorrowDate = Date.from(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
+
+            Query query = em.createQuery(
+                    "SELECT i FROM Item i WHERE i.name LIKE ?1 AND i.auctionEnd > ?2"
+            );
+            query.setParameter(1, searchString);
+            query.setParameter(2, tomorrowDate, TemporalType.TIMESTAMP);
+
+            List<Item> items = query.getResultList();
+            assertThat(items, Matchers.hasSize(1));
+
+            tx.commit();
+            em.close();
         } finally {
             tx.rollback();
         }
