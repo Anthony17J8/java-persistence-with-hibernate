@@ -3,6 +3,7 @@ package com.ico.ltd.querying.domain;
 import org.hamcrest.Matchers;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityTransaction;
@@ -389,6 +390,42 @@ public class CreateExecuteQueries extends QueryingTest {
                 }
                 assertTrue(gotException);
             }
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void scrollThroughResultSet() throws Exception {
+        storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            // Scrolling with a database cursor
+            Session session = em.unwrap(Session.class);
+
+            org.hibernate.query.Query query = session.createQuery(
+                    "select i from Item i order by i.id asc"
+            );
+
+            org.hibernate.ScrollableResults cursor =
+                    query.scroll(org.hibernate.ScrollMode.SCROLL_INSENSITIVE);
+
+            // Jump to third result row
+            cursor.setRowNumber(2);
+
+            // Get first "column"
+            Item item = (Item) cursor.get(0);
+
+            cursor.close(); // Required!
+
+            assertEquals("Baz", item.getName());
 
             tx.commit();
             em.close();
