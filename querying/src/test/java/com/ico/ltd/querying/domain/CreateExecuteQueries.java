@@ -1,6 +1,7 @@
 package com.ico.ltd.querying.domain;
 
 import org.hamcrest.Matchers;
+import org.hibernate.Hibernate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -20,6 +21,7 @@ import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -427,6 +429,41 @@ public class CreateExecuteQueries extends QueryingTest {
 
             assertEquals("Baz", item.getName());
 
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void iteration() throws Exception {
+        storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            // Iterating through a result
+            Session session = em.unwrap(Session.class);
+
+            org.hibernate.query.Query query = session.createQuery(
+                    "select i from Item i"
+            );
+
+            int count = 0;
+            Iterator<Item> it = query.iterate(); // select ID from ITEM
+            while (it.hasNext()) {
+                Item next = it.next(); // select * from ITEM where ID = ?
+                // ...
+                count++;
+            }
+
+            // Iterator must be closed, either when the Session
+            // is closed or manually:
+            Hibernate.close(it);
+
+            assertEquals(count, 3);
             tx.commit();
             em.close();
         } finally {
