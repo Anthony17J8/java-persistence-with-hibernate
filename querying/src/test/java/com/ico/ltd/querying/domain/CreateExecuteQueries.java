@@ -6,6 +6,8 @@ import org.hibernate.ScrollableResults;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -310,6 +312,82 @@ public class CreateExecuteQueries extends QueryingTest {
                 assertEquals(count, 3);
                 items = query.getResultList();
                 assertEquals(items.size(), 0);
+            }
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    void executeQueries() throws Exception {
+        TestDataCategoriesItems testData = storeTestData();
+        Long ITEM_ID = testData.items.getFirstId();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            { // Get a list
+                Query query = em.createQuery("select i from Item i");
+                List<Item> items = query.getResultList();
+
+                assertEquals(items.size(), 3);
+            }
+            { // Get a list of scalar values
+                Query query = em.createQuery("select i.name from Item i");
+                List<String> itemNames = query.getResultList();
+
+                assertEquals(itemNames.size(), 3);
+            }
+            { // Single result
+                TypedQuery<Item> query = em.createQuery(
+                        "select i from Item i where i.id = :id", Item.class
+                ).setParameter("id", ITEM_ID);
+
+                Item item = query.getSingleResult();
+
+                assertEquals(item.getId(), ITEM_ID);
+            }
+            { // Single scalar result
+                TypedQuery<String> query = em.createQuery(
+                        "select i.name from Item i where i.id = :id", String.class
+                ).setParameter("id", ITEM_ID);
+
+                String itemName = query.getSingleResult();
+
+                assertEquals(em.find(Item.class, ITEM_ID).getName(), itemName);
+            }
+            { // No (single) result
+                boolean gotException = false;
+                try {
+                    TypedQuery<Item> query = em.createQuery(
+                            "select i from Item i where i.id = :id", Item.class
+                    ).setParameter("id", 1234L);
+
+                    Item item = query.getSingleResult();
+
+                } catch (NoResultException ex) {
+                    gotException = true;
+                }
+                assertTrue(gotException);
+            }
+            { // Not a unique result
+                boolean gotException = false;
+                try {
+                    Query query = em.createQuery(
+                            "select i from Item i where i.name like '%a%'"
+                    );
+
+                    Item item = (Item) query.getSingleResult();
+
+                } catch (NonUniqueResultException ex) {
+                    gotException = true;
+                }
+                assertTrue(gotException);
             }
 
             tx.commit();
