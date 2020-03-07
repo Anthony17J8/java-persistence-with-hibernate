@@ -12,6 +12,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @ExtendWith(SpringExtension.class)
@@ -65,7 +67,7 @@ class QueryingTest {
         em.persist(categoryOne);
         categoryIds[0] = categoryOne.getId();
 
-        Item item = new Item("Foo", new Date(), johndoe);
+        Item item = new Item("Foo", Date.from(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC)), johndoe);
         item.setBuyNowPrice(new BigDecimal("19.99"));
         em.persist(item);
         itemIds[0] = item.getId();
@@ -85,7 +87,7 @@ class QueryingTest {
         em.persist(categoryTwo);
         categoryIds[1] = categoryTwo.getId();
 
-        item = new Item("Bar", new Date(), johndoe);
+        item = new Item("Bar", Date.from(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC)), johndoe);
         em.persist(item);
         itemIds[1] = item.getId();
         categoryTwo.getItems().add(item);
@@ -94,7 +96,7 @@ class QueryingTest {
         item.getBids().add(bid);
         em.persist(bid);
 
-        item = new Item("Baz", new Date(), janeroe);
+        item = new Item("Baz", Date.from(LocalDateTime.now().plusDays(2).toInstant(ZoneOffset.UTC)), janeroe);
         item.setApproved(false);
         em.persist(item);
         itemIds[2] = item.getId();
