@@ -1,6 +1,8 @@
 package com.ico.ltd.querying.domain;
 
 import org.hamcrest.Matchers;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityTransaction;
@@ -248,5 +250,72 @@ public class CreateExecuteQueries extends QueryingTest {
     protected String getValueEnteredByUser() {
         // What if this would be "foo ' and callSomeStoredProcedure() and 'bar' = 'bar"?
         return "ALWAYS FILTER VALUES ENTERED BY USERS!";
+    }
+
+    @Test
+    void pagination() throws Exception {
+        storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            List<Item> items;
+            { // Limiting result rows
+                Query query = em.createQuery("select i from Item i");
+                query.setFirstResult(40).setMaxResults(10);
+
+                items = query.getResultList();
+                assertEquals(items.size(), 0);
+            }
+            em.clear();
+            { // Rewrite SQL
+                Query query = em.createNativeQuery("select * from ITEM");
+                query.setFirstResult(40).setMaxResults(10);
+
+                items = query.getResultList();
+                assertEquals(items.size(), 0);
+            }
+            em.clear();
+            { // Getting total count with a cursor
+                Query query = em.createQuery("select i from Item i");
+
+                /*
+                   Unwrap the Hibernate API to use scrollable cursors.
+                 */
+                org.hibernate.query.Query hibernateQuery = query.unwrap(org.hibernate.query.Query.class);
+
+                /*
+                   Execute the query with a database cursor; this does not retrieve the
+                   result set into memory.
+                 */
+                ScrollableResults cursor = hibernateQuery.scroll(ScrollMode.SCROLL_INSENSITIVE);
+
+                /*
+                   Jump to the last row of the result in the database, then get the row number.
+                   Since row numbers are zero-based, add one to get the total count of rows.
+                 */
+                cursor.last();
+                int count = cursor.getRowNumber() + 1;
+
+                /*
+                   You must close the database cursor.
+                 */
+                cursor.close();
+                /*
+                   Now execute the query again and retrieve an arbitrary page of data.
+                 */
+                query.setFirstResult(40).setMaxResults(10);
+
+                assertEquals(count, 3);
+                items = query.getResultList();
+                assertEquals(items.size(), 0);
+            }
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
     }
 }
