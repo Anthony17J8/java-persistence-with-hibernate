@@ -4,10 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
@@ -17,15 +15,19 @@ import java.util.Properties;
 @Configuration
 public class PersistenceConfig {
 
+    public static final String[] MAPPING_FILES = new String[]{
+            "querying/ExternalizedQueries.xml",
+            "querying/ExternalizedQueries.hbm.xml"
+    };
+
     @Bean
-    LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean emf =
-                new LocalContainerEntityManagerFactoryBean();
+    LocalSessionFactoryBean entityManagerFactory() {
+        LocalSessionFactoryBean emf =
+                new LocalSessionFactoryBean();
         emf.setPackagesToScan("com.ico.ltd.querying.domain");
+        emf.setMappingResources(MAPPING_FILES);
         emf.setDataSource(createDataSource());
-        emf.setJpaVendorAdapter(createJpaVendorAdapter());
-        emf.setJpaProperties(createHibernateProperties());
-        emf.afterPropertiesSet();
+        emf.setHibernateProperties(createHibernateProperties());
         return emf;
     }
 
@@ -33,10 +35,6 @@ public class PersistenceConfig {
         EmbeddedDatabaseBuilder builder =
                 new EmbeddedDatabaseBuilder();
         return builder.setType(EmbeddedDatabaseType.H2).build();
-    }
-
-    private JpaVendorAdapter createJpaVendorAdapter() {
-        return new HibernateJpaVendorAdapter();
     }
 
     private Properties createHibernateProperties() {

@@ -6,6 +6,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CreateExecuteQueries extends QueryingTest {
 
     @Test
+    @DirtiesContext
     public void createQueries() throws Exception {
         storeTestData();
         em = emf.createEntityManager();
@@ -72,6 +74,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void createTypedQueries() throws Exception {
         TestDataCategoriesItems testData = storeTestData();
         Long ITEM_ID = testData.items.getFirstId();
@@ -118,6 +121,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void namedParameterBinding() throws Exception {
         TestDataCategoriesItems testData = storeTestData();
 
@@ -225,6 +229,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void positionalParameterBinding() throws Exception {
         storeTestData();
 
@@ -258,6 +263,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void pagination() throws Exception {
         storeTestData();
         em = emf.createEntityManager();
@@ -325,6 +331,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void executeQueries() throws Exception {
         TestDataCategoriesItems testData = storeTestData();
         Long ITEM_ID = testData.items.getFirstId();
@@ -401,6 +408,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void scrollThroughResultSet() throws Exception {
         storeTestData();
         em = emf.createEntityManager();
@@ -437,6 +445,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void iteration() throws Exception {
         storeTestData();
         em = emf.createEntityManager();
@@ -464,6 +473,52 @@ public class CreateExecuteQueries extends QueryingTest {
             Hibernate.close(it);
 
             assertEquals(count, 3);
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    @DirtiesContext
+    void namedQueriesWithXml() throws Exception {
+        TestDataCategoriesItems testData = storeTestData();
+        Long ITEM_ID = testData.items.getFirstId();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            {
+                // JPQL
+                Query query = em.createNamedQuery("findItems");
+                List<Item> items = query.getResultList();
+
+                assertThat(items, Matchers.hasSize(3));
+            }
+            em.clear();
+            {
+                // Native SQL
+                Query query = em.createNamedQuery("findItemsSQL");
+
+                List<Item> items = query.getResultList();
+
+                assertEquals(items.size(), 3);
+                assertEquals(items.get(0).getId(), ITEM_ID);
+            }
+            em.clear();
+            {
+                Query query = em.createNamedQuery("findItemsSQLHibernate");
+                List<Item> items = query.getResultList();
+
+                assertThat(items, Matchers.hasSize(3));
+                assertEquals("Bar", items.get(0).getName());
+                assertEquals("Baz", items.get(1).getName());
+                assertEquals("Foo", items.get(2).getName());
+            }
+
             tx.commit();
             em.close();
         } finally {

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<hibernate-mapping xmlns="http://www.hibernate.org/xsd/orm/hbm">
+
+    <query name="findItemsOrderByAuctionEndHibernate">
+        select i from Item i order by i.auctionEnd asc
+    </query>
+
+    <sql-query name="findItemsSQLHibernate">
+        <return class="com.ico.ltd.querying.domain.Item"/>
+        select * from ITEM order by NAME asc
+    </sql-query>
+
+</hibernate-mapping>

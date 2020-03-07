@@ -1,0 +1,23 @@
+<entity-mappings
+        version="2.1"
+        xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+
+    <named-query name="findItems">
+        <query><![CDATA[
+            SELECT i FROM Item i
+        ]]>
+        </query>
+    </named-query>
+
+    <named-native-query name="findItemsSQL"
+                        result-class="com.ico.ltd.querying.domain.Item">
+        <query><![CDATA[
+            SELECT * FROM ITEM
+        ]]>
+        </query>
+    </named-native-query>
+
+</entity-mappings>

@@ -5,6 +5,7 @@ import com.ico.ltd.querying.util.TestData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -32,6 +33,7 @@ class QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void testInitData() throws Exception {
         storeTestData();
     }
