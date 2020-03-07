@@ -527,6 +527,7 @@ public class CreateExecuteQueries extends QueryingTest {
     }
 
     @Test
+    @DirtiesContext
     void namedQueryWithAnnotation() throws Exception {
         TestDataCategoriesItems testData = storeTestData();
         Long ITEM_ID = testData.items.getFirstId();
@@ -548,13 +549,40 @@ public class CreateExecuteQueries extends QueryingTest {
             em.clear();
             {
                 TypedQuery<Item> query = em.createNamedQuery("findItemsOrderByName", Item.class);
-                List<Item> items =query.getResultList();
+                List<Item> items = query.getResultList();
 
                 assertThat(items, Matchers.hasSize(3));
                 assertEquals("Foo", items.get(0).getName());
                 assertEquals("Baz", items.get(1).getName());
                 assertEquals("Bar", items.get(2).getName());
             }
+
+            tx.commit();
+            em.close();
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    @DirtiesContext
+    void createNamedQueries() throws Exception {
+        storeTestData();
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            Query findItemsQuery = em.createQuery("SELECT i FROM Item i");
+
+            emf.addNamedQuery("savedFindItemsQuery", findItemsQuery);
+
+            // Later on... with the same EntityManagerFactory
+            Query query = em.createNamedQuery("savedFindItemsQuery");
+            List<Item> items = query.getResultList();
+
+            assertThat(items, Matchers.hasSize(3));
 
             tx.commit();
             em.close();
