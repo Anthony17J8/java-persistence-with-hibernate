@@ -68,7 +68,63 @@ public class Subselects extends QueryingTest {
             }
             em.clear();
             {
-                
+                // ALL
+                // select i from Item i where 10 >= all (select b.amount from i.bids b)
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                Subquery<BigDecimal> sq = criteria.subquery(BigDecimal.class);
+                Root<Bid> b = sq.from(Bid.class);
+                sq.select(b.get("amount"));
+                sq.where(cb.equal(b.get("item"), i));
+
+                criteria.select(i).where(
+                        cb.greaterThanOrEqualTo(
+                                cb.literal(new BigDecimal(10)),
+                                cb.all(sq)
+                        )
+                );
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(2));
+            }
+            em.clear();
+            {
+                // ANY
+                // select i from Item i where 101.00 = any (select b.amount from i.bids b)
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                Subquery<BigDecimal> sq = criteria.subquery(BigDecimal.class);
+                Root<Bid> b = sq.from(Bid.class);
+                sq.select(b.get("amount")).where(cb.equal(b.get("item"), i));
+
+                criteria.select(i).where(cb.equal(
+                        cb.literal(new BigDecimal(101)),
+                        cb.any(sq)
+                        )
+                );
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(1));
+            }
+            em.clear();
+            {
+                // EXISTS
+                // select i from Item i where exists (select b from Bid b where b.item = i)
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                Subquery<Bid> sq = criteria.subquery(Bid.class);
+                Root<Bid> b = sq.from(Bid.class);
+                sq.select(b).where(
+                        cb.equal(b.get("item"), i)
+                );
+
+                criteria.select(i).where(cb.exists(sq));
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(2));
             }
 
             tx.commit();
@@ -76,6 +132,5 @@ public class Subselects extends QueryingTest {
         } finally {
             tx.rollback();
         }
-
     }
 }
