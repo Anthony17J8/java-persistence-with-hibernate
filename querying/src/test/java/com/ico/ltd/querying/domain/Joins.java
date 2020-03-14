@@ -7,11 +7,14 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -131,6 +134,121 @@ public class Joins extends QueryingTest {
                 assertTrue(result.get(1)[1] instanceof Item);
                 */
                 }
+            }
+            em.clear();
+            {
+                // select i from Item i left join fetch i.bids
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                i.fetch("bids", JoinType.LEFT);
+                criteria.select(i);
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(5)); // 3 items, 4 bids, 5 'rows' in result
+
+                Set<Item> distinctResult = new LinkedHashSet<>(result); // in-memory 'distinct'
+                assertThat(distinctResult, hasSize(3));
+
+                boolean haveBids = false;
+                for (Item item : distinctResult) {
+                    em.detach(item); // No more lazy loading!
+                    if (item.getBids().size() > 0) {
+                        haveBids = true;
+                        break;
+                    }
+                }
+                assertTrue(haveBids);
+            }
+            em.clear();
+            {
+                // select distinct i from Item i left join fetch i.bids
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                i.fetch("bids", JoinType.LEFT);
+
+                // DISTINCT operation does not execute in the database.
+                // Hibernate performs deduplication in memory
+                criteria.select(i).distinct(true);
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(3));
+
+                boolean haveBids = false;
+                for (Item item : result) {
+                    em.detach(item); // No more lazy loading!
+                    if (item.getBids().size() > 0) {
+                        haveBids = true;
+                        break;
+                    }
+                }
+                assertTrue(haveBids);
+            }
+            em.clear();
+            {
+                // select distinct i from Item i
+                // left join fetch i.bids b
+                // join fetch b.bidder
+                // left join fetch i.seller
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                Fetch<Item, Bid> b = i.fetch("bids", JoinType.LEFT);
+                b.fetch("bidder"); // These are non-nullable foreign key columns, inner join or
+                i.fetch("seller", JoinType.LEFT); // outer doesn't make a difference!
+                criteria.select(i).distinct(true);
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(2));
+
+                boolean haveBids = false;
+                boolean haveBidder = false;
+                boolean haveSeller = false;
+                for (Item item : result) {
+                    em.detach(item); // No more lazy loading!
+                    if (item.getBids().size() > 0) {
+                        haveBids = true;
+                        Bid bid = item.getBids().iterator().next();
+                        if (bid.getBidder() != null && bid.getBidder().getUsername() != null) {
+                            haveBidder = true;
+                        }
+                    }
+                    if (item.getSeller() != null && item.getSeller().getUsername() != null)
+                        haveSeller = true;
+                }
+                assertTrue(haveBids);
+                assertTrue(haveBidder);
+                assertTrue(haveSeller);
+            }
+            em.clear();
+            {   // SQL Cartesian product of multiple collections! Bad!
+                // select distinct i from Item i
+                // left join fetch i.bids
+                // left join fetch i.images
+                CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
+                Root<Item> i = criteria.from(Item.class);
+                i.fetch("bids", JoinType.LEFT);
+                i.fetch("images", JoinType.LEFT); // Cartesian product, bad!
+                criteria.select(i).distinct(true);
+
+                TypedQuery<Item> query = em.createQuery(criteria);
+                List<Item> result = query.getResultList();
+                assertThat(result, hasSize(3));
+
+                boolean haveBids = false;
+                boolean haveImages = false;
+                for (Item item : result) {
+                    em.detach(item); // No more lazy loading!
+                    if (item.getBids().size() > 0) {
+                        haveBids = true;
+                    }
+                    if (item.getImages().size() > 0) {
+                        haveImages = true;
+                    }
+                }
+                assertTrue(haveBids);
+                assertTrue(haveImages);
             }
 
             tx.commit();
