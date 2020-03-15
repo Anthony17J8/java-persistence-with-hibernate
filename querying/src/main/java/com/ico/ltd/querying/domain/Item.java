@@ -4,9 +4,11 @@ import com.ico.ltd.querying.Constants;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.FieldResult;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,6 +18,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -25,6 +29,25 @@ import java.util.Set;
 @NamedQueries({
         @NamedQuery(name = "findItemById",
                 query = "SELECT i FROM Item i WHERE i.id = :itemId")
+})
+@SqlResultSetMappings({
+        @SqlResultSetMapping(
+                name = "ItemResult",
+                entities =
+                @EntityResult(
+                        entityClass = Item.class,
+                        fields = {
+                                @FieldResult(name = "id", column = "ID"),
+                                @FieldResult(name = "name", column = "EXTENDED_NAME"),
+                                @FieldResult(name = "createdOn", column = "CREATEDON"),
+                                @FieldResult(name = "auctionEnd", column = "AUCTIONEND"),
+                                @FieldResult(name = "auctionType", column = "AUCTIONTYPE"),
+                                @FieldResult(name = "approved", column = "APPROVED"),
+                                @FieldResult(name = "buyNowPrice", column = "BUYNOWPRICE"),
+                                @FieldResult(name = "seller", column = "SELLER_ID")
+                        }
+                )
+        )
 })
 @Entity
 public class Item {

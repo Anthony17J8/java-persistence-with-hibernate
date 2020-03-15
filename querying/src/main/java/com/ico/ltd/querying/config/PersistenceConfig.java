@@ -17,7 +17,8 @@ public class PersistenceConfig {
 
     public static final String[] MAPPING_FILES = new String[]{
             "querying/ExternalizedQueries.xml",
-            "querying/ExternalizedQueries.hbm.xml"
+            "querying/ExternalizedQueries.hbm.xml",
+            "querying/NativeQueries.xml"
     };
 
     @Bean
