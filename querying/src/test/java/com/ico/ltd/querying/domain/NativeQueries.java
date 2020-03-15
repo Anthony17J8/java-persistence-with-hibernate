@@ -237,7 +237,15 @@ public class NativeQueries extends QueryingTest {
             }
             em.clear();
             {
+                // Externalized recursive SQL query
+                Query query = em.createNamedQuery("findAllCategories");
+                List<Object[]> result = query.getResultList();
 
+                for (Object[] tuple : result) {
+                    Category category = (Category) tuple[0];
+                    String path = (String) tuple[1];
+                    Integer level = (Integer) tuple[2];
+                }
             }
             tx.commit();
             em.close();

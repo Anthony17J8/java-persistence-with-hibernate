@@ -5,6 +5,48 @@
         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
 http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
 
+    <named-native-query name="findAllCategories"
+                        result-set-mapping="CategoryResult">
+        <query>
+            with CATEGORY_LINK(ID, NAME, PARENT_ID, PATH, LEVEL) as (
+                select
+                    ID,
+                    NAME,
+                    PARENT_ID,
+                    '/' || NAME,
+                    0
+                from CATEGORY where PARENT_ID is null
+                union all
+                select
+                    c.ID,
+                    c.NAME,
+                    c.PARENT_ID,
+                    cl.PATH || '/' || c.NAME,
+                    cl.LEVEL + 1
+                from CATEGORY_LINK cl
+                join CATEGORY c on cl.ID = c.PARENT_ID
+            )
+            select
+                ID,
+                NAME as CAT_NAME,
+                PARENT_ID,
+                PATH,
+                LEVEL
+            from CATEGORY_LINK
+            order by ID
+        </query>
+    </named-native-query>
+
+    <sql-result-set-mapping name="CategoryResult">
+        <entity-result entity-class="com.ico.ltd.querying.domain.Category">
+            <field-result name="id" column="ID"/>
+            <field-result name="name" column="CAT_NAME"/>
+            <field-result name="parent" column="PARENT_ID"/>
+        </entity-result>
+        <column-result name="PATH"/>
+        <column-result name="LEVEL" class="java.lang.Integer"/>
+    </sql-result-set-mapping>
+
     <sql-result-set-mapping name="ExternalizedItemResult">
         <entity-result entity-class="com.ico.ltd.querying.domain.Item">
             <field-result name="id" column="ID"/>
