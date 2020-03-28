@@ -5,6 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.CacheRegionStatistics;
 import org.hibernate.stat.NaturalIdCacheStatistics;
+import org.hibernate.stat.QueryStatistics;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -281,6 +284,7 @@ class SecondLevelCache {
     }
 
     @Test
+    @DirtiesContext
     public void cacheControl() throws Exception {
         CacheTestData testData = storeTestData();
         Long USER_ID = testData.users.getFirstId();
@@ -385,6 +389,93 @@ class SecondLevelCache {
         testData.items = new TestData(itemIds);
         testData.users = new TestData(userIds);
         return testData;
+    }
+
+    @Test
+    @DirtiesContext
+    public void cacheQueryResults() throws Exception {
+        CacheTestData testData = storeTestData();
+        Long USER_ID = testData.users.getFirstId();
+        Long ITEM_ID = testData.items.getFirstId();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+
+            // Clear the Item entity cache region
+            emf.getCache().evict(Item.class);
+
+            Statistics stats = emf.unwrap(SessionFactory.class).getStatistics();
+
+            {
+                tx.begin();
+
+                String queryString = "select i from Item i where i.name like :n";
+
+                /*
+                   You have to enable caching for a particular query. Without
+                   the <code>org.hibernate.cachable</code> hint, the
+                   result won't be stored in the query result cache.
+                 */
+                TypedQuery<Item> query = em.createQuery(queryString, Item.class)
+                        .setParameter("n", "I%")
+                        .setHint("org.hibernate.cacheable", true);
+
+                /*
+                   Hibernate will now execute the SQL query and retrieve the
+                   result set into memory.                 */
+                List<Item> items = query.getResultList();
+                assertEquals(items.size(), 3);
+
+                /*
+                   Using the statistics API, you can find out more details.
+                   This is the first time you execute this query, so you get
+                   a cache miss, not a hit. Hibernate puts the query and
+                   its result into the cache. If you run the exact same query
+                   again, the result will be from the cache.
+                 */
+                QueryStatistics queryStats = stats.getQueryStatistics(queryString);
+                assertEquals(queryStats.getCacheHitCount(), 0);
+                assertEquals(queryStats.getCacheMissCount(), 1);
+                assertEquals(queryStats.getCachePutCount(), 1);
+
+                /*
+                   The actual entity instance data retrieved in the result set is
+                   stored in the entity cache region, not in the query result cache.
+                 */
+                CacheRegionStatistics itemCacheStats =
+                        stats.getCacheRegionStatistics(Item.class.getName());
+//                assertEquals(itemCacheStats.getElementCountInMemory(), 3);
+
+                tx.commit();
+                em.close();
+            }
+
+            { // Execute the query again, hitting the cache
+                em = emf.createEntityManager();
+                tx = em.getTransaction();
+                tx.begin();
+                String queryString = "select i from Item i where i.name like :n";
+
+                List<Item> items = em.createQuery(queryString, Item.class)
+                        .setParameter("n", "I%")
+                        .setHint("org.hibernate.cacheable", true)
+                        .getResultList();
+
+                assertEquals(items.size(), 3);
+
+                QueryStatistics queryStats = stats.getQueryStatistics(queryString);
+                assertEquals(queryStats.getCacheHitCount(), 1);
+                assertEquals(queryStats.getCacheMissCount(), 1);
+                assertEquals(queryStats.getCachePutCount(), 1);
+
+                tx.commit();
+                em.close();
+            }
+
+        } finally {
+            tx.rollback();
+        }
     }
 
     @javax.management.MXBean
