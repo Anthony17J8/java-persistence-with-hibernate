@@ -14,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.management.ObjectName;
+import javax.persistence.CacheRetrieveMode;
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -25,6 +27,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
@@ -211,6 +215,58 @@ class SecondLevelCache {
                 CacheRegionStatistics userStats =
                         stats.getCacheRegionStatistics(User.class.getName());
                 assertEquals(userStats.getHitCount(), 1);
+
+                tx.commit();
+                em.close();
+            }
+
+        } finally {
+            tx.rollback();
+        }
+    }
+
+    @Test
+    @DirtiesContext
+    public void cacheModes() throws Exception {
+        CacheTestData testData = storeTestData();
+        Long USER_ID = testData.users.getFirstId();
+        Long ITEM_ID = testData.items.getFirstId();
+
+        em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+
+            {
+                tx.begin();
+
+                Statistics stats = emf.unwrap(SessionFactory.class).getStatistics();
+
+                CacheRegionStatistics itemCacheStats =
+                        stats.getCacheRegionStatistics(Item.class.getName());
+
+                // Bypass the cache when retrieving an entity instance by identifier
+                {
+                    Map<String, Object> properties = new HashMap<String, Object>();
+                    properties.put("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+                    Item item = em.find(Item.class, ITEM_ID, properties); // Hit the database
+                    assertEquals(itemCacheStats.getHitCount(), 0);
+                }
+
+                // Bypass the cache when storing an entity instance
+//                assertEquals(itemCacheStats.getElementCountInMemory(), 3);
+                em.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
+                Item item = new Item(
+                        // ...
+                        "Some Item",
+                        Date.from(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC)),
+                        em.find(User.class, USER_ID)
+                );
+
+                em.persist(item); // Not stored in the cache
+
+                em.flush();
+//                assertEquals(itemCacheStats.getElementCountInMemory(), 3); // Unchanged
 
                 tx.commit();
                 em.close();
