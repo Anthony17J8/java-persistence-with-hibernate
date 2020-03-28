@@ -1,7 +1,9 @@
 package com.ico.ltd.cache.domain;
 
 import com.ico.ltd.cache.Constants;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,6 +14,10 @@ import java.math.BigDecimal;
 
 @Entity
 @org.hibernate.annotations.Immutable
+@Cacheable
+@org.hibernate.annotations.Cache(
+        usage = CacheConcurrencyStrategy.READ_ONLY
+)
 public class Bid {
 
     @Id

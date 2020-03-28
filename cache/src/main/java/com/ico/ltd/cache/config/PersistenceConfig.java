@@ -19,7 +19,7 @@ public class PersistenceConfig {
     LocalSessionFactoryBean entityManagerFactory() {
         LocalSessionFactoryBean emf =
                 new LocalSessionFactoryBean();
-        emf.setPackagesToScan("com.ico.ltd.querying.domain");
+        emf.setPackagesToScan("com.ico.ltd.cache.domain");
         emf.setDataSource(createDataSource());
         emf.setHibernateProperties(createHibernateProperties());
         return emf;

@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@org.hibernate.annotations.Cache(
+        usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE
+)
 public class Item {
 
     @Id
@@ -31,6 +34,9 @@ public class Item {
     protected User seller;
 
     @OneToMany(mappedBy = "item")
+    @org.hibernate.annotations.Cache(
+            usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE
+    )
     protected Set<Bid> bids = new HashSet<>();
 
     protected Item() {

@@ -1,7 +1,9 @@
 package com.ico.ltd.cache.domain;
 
 import com.ico.ltd.cache.Constants;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +13,11 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "USERS")
+@Cacheable
+@org.hibernate.annotations.Cache(
+        usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE
+)
+@org.hibernate.annotations.NaturalIdCache
 public class User {
 
     @Id
@@ -20,6 +27,7 @@ public class User {
 
     @NotNull // Ignored for schema generation because of @NaturalId
     @Column(nullable = false) // For schema generation
+    @org.hibernate.annotations.NaturalId(mutable = true) // Makes it UNIQUE
     protected String username;
 
     protected User() {
