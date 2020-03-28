@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.management.ObjectName;
+import javax.persistence.Cache;
 import javax.persistence.CacheRetrieveMode;
 import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
@@ -33,6 +34,8 @@ import java.util.Set;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = PersistenceConfig.class)
@@ -275,6 +278,29 @@ class SecondLevelCache {
         } finally {
             tx.rollback();
         }
+    }
+
+    @Test
+    public void cacheControl() throws Exception {
+        CacheTestData testData = storeTestData();
+        Long USER_ID = testData.users.getFirstId();
+        Long ITEM_ID = testData.items.getFirstId();
+
+        Cache cache = emf.getCache();
+
+        assertTrue(cache.contains(Item.class, ITEM_ID));
+        cache.evict(Item.class, ITEM_ID);
+        cache.evict(Item.class);
+        cache.evictAll();
+
+        org.hibernate.Cache hibernateCache =
+                cache.unwrap(org.hibernate.Cache.class);
+
+        assertFalse(hibernateCache.containsEntity(Item.class, ITEM_ID));
+        hibernateCache.evictEntityData();
+        hibernateCache.evictCollectionData();
+        hibernateCache.evictNaturalIdData();
+        hibernateCache.evictQueryRegions();
     }
 
     public static class CacheTestData {
